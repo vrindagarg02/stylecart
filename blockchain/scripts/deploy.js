@@ -1,0 +1,10 @@
+import hre from "hardhat";
+import fs from "fs";
+import path from "path";
+const { ethers } = hre;
+const factory = await ethers.getContractFactory("OrderVerification");
+const contract = await factory.deploy();
+await contract.waitForDeployment();
+const address = await contract.getAddress();
+console.log("OrderVerification deployed:", address);
+fs.writeFileSync(path.join(process.cwd(),"deployment.json"), JSON.stringify({address},null,2));

@@ -1,0 +1,9 @@
+import {Routes,Route,Navigate} from "react-router-dom"; import {useEffect,useState} from "react"; import "./App.css";
+import Navbar from "./components/navbar"; import Home from "./pages/home"; import Cart from "./pages/cart"; import ProductDetails from "./pages/ProductDetails"; import Login from "./pages/Login"; import Checkout from "./pages/Checkout"; import Orders from "./pages/Orders"; import OrderDetails from "./pages/OrderDetails"; import Admin from "./pages/Admin"; import Assistant from "./pages/Assistant"; import {api} from "./services/api"; import {ToastContainer} from "react-toastify"; import "react-toastify/dist/ReactToastify.css";
+function App(){const [user,setUser]=useState(()=>JSON.parse(localStorage.getItem("user")||"null")); const [boot,setBoot]=useState(true);
+useEffect(()=>{if(localStorage.getItem("token"))api("/auth/me").then(x=>setUser(x.user)).catch(()=>{localStorage.clear();setUser(null)}).finally(()=>setBoot(false));else setBoot(false)},[]);
+const logout=()=>{localStorage.clear();setUser(null)};
+if(boot)return <div className="screen-center">Loading StyleCart…</div>;
+if(!user)return <Login onAuth={x=>{localStorage.setItem("token",x.token);localStorage.setItem("user",JSON.stringify(x.user));setUser(x.user)}}/>;
+return <><Navbar user={user} onLogout={logout}/><ToastContainer position="top-right" autoClose={2200}/><Routes><Route path="/" element={<Home/>}/><Route path="/cart" element={<Cart/>}/><Route path="/checkout" element={<Checkout/>}/><Route path="/product/:id" element={<ProductDetails/>}/><Route path="/orders" element={<Orders/>}/><Route path="/orders/:id" element={<OrderDetails/>}/><Route path="/assistant" element={<Assistant/>}/><Route path="/admin" element={user.role==="admin"?<Admin/>:<Navigate to="/"/>}/><Route path="*" element={<Navigate to="/"/>}/></Routes></>}
+export default App;

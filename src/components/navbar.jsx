@@ -1,0 +1,2 @@
+import {Link} from "react-router-dom"; import {useCart} from "../context/CartContext";
+export default function Navbar({user,onLogout}){const {cart}=useCart();return <nav><Link className="brand" to="/">StyleCart 🛍</Link><div className="nav-links"><Link to="/">Home</Link><Link to="/assistant">AI Stylist</Link><Link to="/orders">Orders</Link>{user.role==="admin"&&<Link to="/admin">Admin</Link>}<Link className="cart-pill" to="/cart">Cart ({cart.reduce((s,i)=>s+i.quantity,0)})</Link><button onClick={onLogout}>Logout</button></div></nav>}

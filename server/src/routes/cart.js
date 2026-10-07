@@ -1,0 +1,8 @@
+import {Router} from "express"; import Cart from "../models/Cart.js"; import Product from "../models/Product.js"; import {auth} from "../middleware/auth.js";
+const r=Router();
+r.get("/",auth(),async(req,res)=>res.json(await Cart.findOne({user:req.user._id}).populate("items.product")||{user:req.user._id,items:[]}));
+r.post("/",auth(),async(req,res)=>{const {productId,quantity=1}=req.body;const p=await Product.findById(productId);if(!p)return res.status(404).json({message:"Product not found"});let c=await Cart.findOne({user:req.user._id})||new Cart({user:req.user._id,items:[]});const item=c.items.find(i=>String(i.product)===String(productId));if(item)item.quantity+=quantity;else c.items.push({product:productId,quantity});await c.save();await c.populate("items.product");res.json(c)});
+r.put("/:productId",auth(),async(req,res)=>{const c=await Cart.findOne({user:req.user._id});if(!c)return res.status(404).json({message:"Cart not found"});const item=c.items.find(i=>String(i.product)===req.params.productId);if(!item)return res.status(404).json({message:"Item not in cart"});item.quantity=Math.max(0,Number(req.body.quantity));c.items=c.items.filter(i=>i.quantity>0);await c.save();await c.populate("items.product");res.json(c)});
+r.delete("/:productId",auth(),async(req,res)=>{const c=await Cart.findOne({user:req.user._id});if(!c)return res.json({items:[]});c.items=c.items.filter(i=>String(i.product)!==req.params.productId);await c.save();await c.populate("items.product");res.json(c)});
+r.delete("/",auth(),async(req,res)=>{await Cart.findOneAndUpdate({user:req.user._id},{items:[]},{upsert:true});res.json({items:[]})});
+export default r;

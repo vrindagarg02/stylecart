@@ -1,0 +1,2 @@
+import {Router} from "express"; import User from "../models/User.js"; import {auth} from "../middleware/auth.js";
+const r=Router(); r.get("/profile",auth(),async(req,res)=>res.json({id:req.user._id,name:req.user.name,email:req.user.email,role:req.user.role})); r.put("/profile",auth(),async(req,res)=>{const user=await User.findByIdAndUpdate(req.user._id,{name:req.body.name},{new:true}).select("-password");res.json(user)}); export default r;
